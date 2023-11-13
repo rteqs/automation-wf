@@ -14,42 +14,25 @@ def task(
     account = Account.current()
     automation_project_display_name = "Automations"
 
-    automation_project = next(
-        (
-            project
-            for project in account.list_registry_projects()
-            if project.get_display_name() == automation_project_display_name
-        ),
-        None,
-    )
-    if automation_project is None:
-        with account.update() as account_updater:
-            account_updater.upsert_registry_project(
-                display_name=automation_project_display_name
-            )
-        automation_project = next(
-            project
-            for project in account.list_registry_projects()
-            if project.get_display_name() == automation_project_display_name
+    with account.update() as account_updater:
+        account_updater.upsert_registry_project(
+            display_name=automation_project_display_name
         )
-
-    automation_table = next(
-        (
-            table
-            for table in automation_project.list_tables()
-            if table.get_display_name() == f"automation-{automation_id}"
-        ),
-        None,
+    automation_project = next(
+        project
+        for project in account.list_registry_projects()
+        if project.get_display_name() == automation_project_display_name
     )
+
     with automation_project.update() as automation_project_updater:
         automation_project_updater.upsert_table(
             display_name=f"automation-{automation_id}"
         )
-        automation_table = next(
-            table
-            for table in automation_project.list_tables()
-            if table.get_display_name() == f"automation-{automation_id}"
-        )
+    automation_table = next(
+        table
+        for table in automation_project.list_tables()
+        if table.get_display_name() == f"automation-{automation_id}"
+    )
 
     with automation_table.update() as automation_table_updater:
         automation_table_updater.upsert_column("Resolved directories", LatchDir)
@@ -57,13 +40,13 @@ def task(
     resolved_directories = set()
     for page in automation_table.list_records():
         for _, record in page.items():
-            resolved_directories.add(record.get_values()["Resolved directories"])
+            resolved_directories.add(str(record.get_values()["Resolved directories"]))
 
     for dir in input_directory.iterdir():
         if (
             type(dir) == LatchDir
             and dir != output_directory
-            and dir in resolved_directories
+            and str(dir) in resolved_directories
         ):
             continue
 
