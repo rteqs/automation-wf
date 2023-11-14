@@ -1,6 +1,7 @@
 from latch.resources.workflow import workflow
 from latch.types.directory import LatchDir, LatchOutputDir
 from latch.types.metadata import LatchAuthor, LatchMetadata, LatchParameter
+
 from wf.automation import automation_task
 
 metadata = LatchMetadata(
