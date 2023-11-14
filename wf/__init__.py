@@ -1,11 +1,7 @@
-from argparse import ArgumentDefaultsHelpFormatter
-from re import I
-from wf.task import task
-
 from latch.resources.workflow import workflow
-from latch.types.directory import LatchOutputDir, LatchDir
-from latch.types.file import LatchFile
+from latch.types.directory import LatchDir, LatchOutputDir
 from latch.types.metadata import LatchAuthor, LatchMetadata, LatchParameter
+from wf.automation import automation_task
 
 metadata = LatchMetadata(
     display_name="Automation Template",
@@ -30,10 +26,10 @@ metadata = LatchMetadata(
 
 
 @workflow(metadata)
-def template_workflow(
+def automation_workflow(
     input_directory: LatchDir, output_directory: LatchOutputDir, automation_id: str
 ) -> None:
-    task(
+    automation_task(
         input_directory=input_directory,
         output_directory=output_directory,
         automation_id=automation_id,

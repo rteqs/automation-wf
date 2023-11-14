@@ -1,14 +1,14 @@
-from pathlib import Path
 import uuid
-import csv
 
-from latch.resources.tasks import small_task
-from latch.types.directory import LatchOutputDir, LatchDir
 from latch.account import Account
+from latch.resources.tasks import small_task
+from latch.types.directory import LatchDir, LatchOutputDir
+from latch.types.file import LatchFile
+from wf.processing import processing_workflow
 
 
 @small_task
-def task(
+def automation_task(
     input_directory: LatchDir, output_directory: LatchOutputDir, automation_id: str
 ) -> None:
     account = Account.current()
@@ -63,15 +63,14 @@ def task(
 
     for dir in input_directory.iterdir():
         if (
-            type(dir) == LatchDir
-            and str(dir) != str(output_directory)
-            and str(dir) in resolved_directories
+            type(dir) == LatchFile
+            or str(dir) == str(output_directory)
+            or str(dir) in resolved_directories
         ):
             continue
 
-        print(f"Starting workflow on directory: {dir}")
-
         with automation_table.update() as automation_table_updater:
+            processing_workflow(input_directory=dir, output_directory=output_directory)
             automation_table_updater.upsert_record(
                 f"{str(uuid.uuid4())[-8:]}",
                 **{
